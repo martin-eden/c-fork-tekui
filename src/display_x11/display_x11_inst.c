@@ -290,8 +290,23 @@ static TBOOL x11_processvisualevent(struct X11Display *mod,
 				TDBPRINTF(TDB_INFO, ("Released request (ConfigureNotify)\n"));
 			}
 
-			v->winleft = ev->xconfigure.x;
-			v->wintop = ev->xconfigure.y;
+			if (ev->xconfigure.send_event)
+			{
+				v->winleft = ev->xconfigure.x;
+				v->wintop = ev->xconfigure.y;
+			}
+			else
+			{
+				Window child;
+				int rx, ry;
+				if (XTranslateCoordinates(mod->x11_Display, v->window,
+						DefaultRootWindow(mod->x11_Display),
+						0, 0, &rx, &ry, &child))
+				{
+					v->winleft = rx;
+					v->wintop = ry;
+				}
+			}
 
 			if ((v->winwidth != ev->xconfigure.width ||
 					v->winheight != ev->xconfigure.height))

@@ -1046,6 +1046,19 @@ static void x11_setattrs(struct X11Display *mod, struct TVRequest *req)
 	data.v = v;
 	data.num = 0;
 	data.mod = mod;
+
+	{
+		Window child;
+		int rx, ry;
+		if (XTranslateCoordinates(mod->x11_Display, v->window,
+				DefaultRootWindow(mod->x11_Display),
+				0, 0, &rx, &ry, &child))
+		{
+			v->winleft = rx;
+			v->wintop = ry;
+		}
+	}
+
 	data.neww = v->winwidth;
 	data.newh = v->winheight;
 	data.newx = v->winleft;
@@ -1096,6 +1109,11 @@ static void x11_setattrs(struct X11Display *mod, struct TVRequest *req)
 		v->flags |= X11WFL_WAIT_RESIZE;
 	}
 
+	if (v->sizehints->flags & (USPosition | PPosition))
+	{
+		v->sizehints->x = v->winleft;
+		v->sizehints->y = v->wintop;
+	}
 	XSetWMNormalHints(mod->x11_Display, v->window, v->sizehints);
 }
 
