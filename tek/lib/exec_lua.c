@@ -803,7 +803,12 @@ static int tek_lib_exec_run(lua_State *L)
 	ctx->args = tek_lib_exec_getargs(L, TExecBase, 2, ctx->numargs++, 1);
 	lua_pop(L, 1);
 	
+#if LUA_VERSION_NUM >= 505
+	ctx->L = lua_newstate(tek_lib_exec_allocf, TExecBase,
+		(unsigned) luaL_makeseed(L));
+#else
 	ctx->L = lua_newstate(tek_lib_exec_allocf, TExecBase);
+#endif
 	if (ctx->L == TNULL)
 	{
 		tek_lib_exec_freeargs(TExecBase, ctx->args, ctx->numargs);
